@@ -7,6 +7,7 @@ pipeline {
         GIT_URL_APP3 = 'https://github.com/pyroman30/job3'
         BRANCH_PATTERN = 'release/*'
         GITHUB_TOKEN_CREDENTIAL_ID = 'github_token' // ID учетных данных Jenkins с токеном GitHub
+        GIT_EXECUTABLE = '/usr/bin/git' // Замените на путь к исполняемому файлу Git на вашем сервере
     }
 
     stages {
@@ -15,7 +16,7 @@ pipeline {
                 script {
                     // Функция для получения последней релизной ветки
                     def getLatestReleaseBranch = { gitUrl ->
-                        def branches = sh(script: "git ls-remote --heads ${gitUrl}", returnStdout: true).split("\n")
+                        def branches = sh(script: "${GIT_EXECUTABLE} ls-remote --heads ${gitUrl}", returnStdout: true).split("\n")
                         def releaseBranches = branches.findAll { it.contains(BRANCH_PATTERN) }
                         def latestReleaseBranch = releaseBranches.collect { it.split()[1].replace('refs/heads/', '') }.sort().last()
                         return latestReleaseBranch
