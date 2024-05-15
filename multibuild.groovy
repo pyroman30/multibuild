@@ -1,11 +1,14 @@
 pipeline {
     agent any
+
     environment {
         GIT_URL_APP1 = 'https://github.com/pyroman30/job1'
         GIT_URL_APP2 = 'https://github.com/pyroman30/job2'
         GIT_URL_APP3 = 'https://github.com/pyroman30/job3'
         BRANCH_PATTERN = 'release/*'
+        GITHUB_TOKEN_CREDENTIAL_ID = 'github_token' // ID учетных данных Jenkins с токеном GitHub
     }
+
     stages {
         stage('Get Latest Release Branches') {
             steps {
@@ -29,24 +32,53 @@ pipeline {
                 }
             }
         }
+
         stage('Parallel Jobs') {
             parallel {
                 stage('Job for App1') {
                     steps {
-                        build job: 'Job1', parameters: [string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP1}")]
+                        script {
+                            // Получение токена GitHub из учетных данных Jenkins
+                            def githubToken = credentials(GITHUB_TOKEN_CREDENTIAL_ID)
+
+                            // Запуск Job1 с параметром BRANCH
+                            build job: 'Job1', parameters: [
+                                string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP1}"),
+                                string(name: 'GITHUB_TOKEN', value: githubToken)
+                            ]
+                        }
                     }
                 }
+
                 stage('Job for App2') {
                     steps {
-                        build job: 'Job2', parameters: [string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP2}")]
+                        script {
+                            // Получение токена GitHub из учетных данных Jenkins
+                            def githubToken = credentials(GITHUB_TOKEN_CREDENTIAL_ID)
+
+                            // Запуск Job2 с параметром BRANCH
+                            build job: 'Job2', parameters: [
+                                string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP2}"),
+                                string(name: 'GITHUB_TOKEN', value: githubToken)
+                            ]
+                        }
                     }
                 }
+
                 stage('Job for App3') {
                     steps {
-                        build job: 'Job3', parameters: [string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP3}")]
+                        script {
+                            // Получение токена GitHub из учетных данных Jenkins
+                            def githubToken = credentials(GITHUB_TOKEN_CREDENTIAL_ID)
+
+                            // Запуск Job3 с параметром BRANCH
+                            build job: 'Job3', parameters: [
+                                string(name: 'BRANCH', value: "${env.LATEST_RELEASE_BRANCH_APP3}"),
+                                string(name: 'GITHUB_TOKEN', value: githubToken)
+                            ]
+                        }
                     }
                 }
-                // Добавьте больше stages для дополнительных приложений
             }
         }
     }
